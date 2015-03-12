@@ -33,3 +33,7 @@ class Model():
     def log_time_out(self,id_no,time_out):
         self.cursor.execute("UPDATE %s SET time_out=%s WHERE id=%s AND time_out IS NULL",
                             (self.table,id_no,time_out))
+        
+    def get_user_log_details(self,id_no):
+        self.cursor.execute("SELECT * FROM %s WHERE id=%s AND time_out IS NULL",(self.table,id_no))
+        return self.cursor.fetchone()
