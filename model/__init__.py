@@ -110,6 +110,15 @@ class Database():
             query = "SELECT id FROM {} WHERE time_out IS NULL".format(SETTINGS['table'])
             cls.cursor.execute(query)
         return cls.cursor.fetchall()
+
+    @classmethod
+    def store_records(cls, date, records):
+        """
+        Stores the records of the day if any
+        """
+        cls.cursor.execute("INSERT INTO Records(date,ids)",(date,records))
+        cls.conn.commit()
+
     
     def __del__(self):
         self.conn.close()

@@ -76,6 +76,14 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.msg_box.set_message("Member", "{} hasn't signed in!".format(id_no))
             return
+
+    def clean_up(self):
+        """
+        Cleans up current records on table change
+        """
+        self.members_in_ids.clear()
+        self.members_in_names.clear()
+        self.members_in_model.removeRows(0, self.members_in_model.rowCount())
         
     @classmethod
     def check_member_in(cls, id_no):        

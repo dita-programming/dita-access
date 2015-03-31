@@ -15,6 +15,7 @@ class TableHandler(QtCore.QObject):
     '''
     
     finished = QtCore.pyqtSignal()
+    clean_up = QtCore.pyqtSignal()
     
     @staticmethod
     def get_date():
@@ -31,6 +32,7 @@ class TableHandler(QtCore.QObject):
         if table_name != SETTINGS['table']:
             SETTINGS['table'] = table_name
             Database.create_table(table_name)
+            self.clean_up.emit()
                 
                     
         time.sleep(3600)
