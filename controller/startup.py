@@ -25,6 +25,7 @@ class Startup():
         '''
         self.handler.moveToThread(self.thread)
         self.handler.finished.connect(self.thread.quit)
+        self.handler.clean_up.connect(self.main.clean_up)
         self.thread.started.connect(self.handler.change_table)
         self.thread.start()
         
