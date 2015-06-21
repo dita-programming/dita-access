@@ -1,13 +1,15 @@
-'''
-Created on Mar 18, 2015
+class Config:
+    db_config = {"user": "root",
+                 "password": "root",
+                 "host": "localhost",
+                 "database": "dita"}
 
-@author: michael
-'''
-SETTINGS = {}
+    table = None
 
-SETTINGS['db_config'] = {"user":"root",
-                         "password":"root",
-                         "host":"localhost",
-                         "database":"dita"}
+    @classmethod
+    def get_table(cls):
+        return cls.table
 
-SETTINGS['table'] = None
+    @classmethod
+    def set_table(cls, table):
+        cls.table = table

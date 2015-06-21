@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Wed Mar 18 17:43:23 2015
+# Created: Mon Jun 22 00:34:20 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,6 +14,9 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(627, 562)
         MainWindow.setMinimumSize(QtCore.QSize(150, 100))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/images/DITA LOGO.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setStyleSheet("QWidget{\n"
 "    background:white;\n"
@@ -154,13 +157,11 @@ class Ui_MainWindow(object):
         self.idLineEdit.setObjectName("idLineEdit")
         self.horizontalLayout_2.addWidget(self.idLineEdit)
         self.signoutButton = QtWidgets.QPushButton(self.gridFrame)
-        self.signoutButton.setAutoDefault(True)
         self.signoutButton.setObjectName("signoutButton")
         self.horizontalLayout_2.addWidget(self.signoutButton)
         self.gridLayout.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
         self.laptopButton = QtWidgets.QPushButton(self.gridFrame)
         self.laptopButton.setStyleSheet("")
-        self.laptopButton.setAutoDefault(True)
         self.laptopButton.setObjectName("laptopButton")
         self.gridLayout.addWidget(self.laptopButton, 0, 0, 1, 1)
         self.verticalLayout_2.addWidget(self.gridFrame)
@@ -192,6 +193,5 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Dita Access"))
         self.idLineEdit.setPlaceholderText(_translate("MainWindow", "ID"))
         self.signoutButton.setText(_translate("MainWindow", "Signout"))
-        self.laptopButton.setText(_translate("MainWindow", "Laptop"))
+        self.laptopButton.setText(_translate("MainWindow", "Signin"))
         self.adminButton.setText(_translate("MainWindow", "Admin"))
-

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>laptopDialog</class>
- <widget class="QDialog" name="laptopDialog">
+ <class>sign_inDialog</class>
+ <widget class="QDialog" name="sign_inDialog">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -20,7 +20,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Laptop Dialog</string>
+   <string>Sign In Dialog</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QDialog {
@@ -63,7 +63,31 @@ QLineEdit {
 	font-weight:bold;
 	padding:6px 24px;
 }
+QLineEdit:disabled {
+	background: #8C8C8C;
+	border-radius:6px;
+	border:1px solid #29668f;
+	font-weight:bold;
+	padding:6px 24px;
+}
 QLabel{
+	font-family:arial;
+	font-size:15px;
+	font-weight:bold;
+	color:#599bb3;
+	padding:6px 6px;
+	text-decoration:none;
+}
+QLabel:disabled{
+	font-family:arial;
+	font-size:15px;
+	font-weight:bold;
+	color:grey;
+	padding:6px 6px;
+	text-decoration:none;
+}
+
+QCheckBox{
 	font-family:arial;
 	font-size:15px;
 	font-weight:bold;
@@ -76,7 +100,7 @@ QLabel{
 </string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="2" column="1">
+   <item row="3" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -118,13 +142,20 @@ QLabel{
    <item row="1" column="1">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="1">
-      <widget class="QLineEdit" name="serialLineEdit"/>
+      <widget class="QLineEdit" name="txt_serial">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="idLineEdit"/>
+      <widget class="QLineEdit" name="txt_id"/>
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="lb_serial">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="text">
         <string>Serial No.</string>
        </property>
@@ -139,7 +170,7 @@ QLabel{
      </item>
     </layout>
    </item>
-   <item row="3" column="1">
+   <item row="4" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -162,6 +193,16 @@ QLabel{
      </property>
     </spacer>
    </item>
+   <item row="2" column="1">
+    <widget class="QCheckBox" name="cbx_laptop">
+     <property name="layoutDirection">
+      <enum>Qt::RightToLeft</enum>
+     </property>
+     <property name="text">
+      <string>No laptop?</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
@@ -169,7 +210,7 @@ QLabel{
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>laptopDialog</receiver>
+   <receiver>sign_inDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -185,7 +226,7 @@ QLabel{
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>laptopDialog</receiver>
+   <receiver>sign_inDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

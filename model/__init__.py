@@ -1,17 +1,28 @@
 """
 This is the main model.
 """
-import mysql.connector
-from model.config import SETTINGS
+from model.database import Database
+from model.member import Member
+from model.laptop import Laptop
+from model.log import LogItem
+from model.dao import DAOFactory
+from model.validator import ValidatorFactory
+from model.config import Config
 
 
-class Database():
+'''class Database():
     """
     This is the class of the model which handles all interactions
     with the database
-    """    
-    conn = mysql.connector.connect(**SETTINGS['db_config'])
-    cursor = conn.cursor(buffered=True)
+    """
+    db = QtSql.QSqlDatabase.addDatabase("QMYSQL")
+    db.setHostName(SETTINGS['db_config']['host'])
+    db.setDatabaseName(SETTINGS['db_config']['database'])
+    db.setUserName(SETTINGS['db_config']['user'])
+    db.setPassword(SETTINGS['db_config']['password'])
+    db.open()
+    #conn = mysql.connector.connect(**SETTINGS['db_config'])
+    cursor = QtSql.QSqlQuery(db)
     
     @classmethod
     def create_table(cls, table):
@@ -25,7 +36,7 @@ class Database():
                     time_out TIME NULL,
                     PRIMARY KEY(indx))
                     ;""" % (table)
-        cls.cursor.execute(query)
+        cls.cursor.exec_(query)
         
         
     @classmethod
@@ -38,8 +49,14 @@ class Database():
         """
         Return details of a member from the database
         """
-        cls.cursor.execute("SELECT * FROM Members WHERE id=%s", (id_no,))
-        return cls.cursor.fetchone()
+        cls.cursor.prepare("SELECT * FROM Members WHERE id=?")
+        cls.cursor.addBindValue(id_no)
+        cls.cursor.exec_()
+
+        if cls.cursor.next():
+            return cls.cursor
+        else:
+            return None
      
     @classmethod   
     def check_member_exists(cls, id_no):
@@ -119,7 +136,12 @@ class Database():
         cls.cursor.execute("INSERT INTO Records(date,ids)",(date,records))
         cls.conn.commit()
 
-    
+
     def __del__(self):
-        self.conn.close()
-    
+        conn_name = self.db.connectionName()
+        self.db.removeDatabase(conn_name)
+
+
+db = Database()
+db.create_table("Members")
+#print(db.get_member('14-2807'))'''
