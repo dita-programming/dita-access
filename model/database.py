@@ -63,5 +63,3 @@ class Database:
     @property
     def error(self):
         return mysql.connector.Error
-
-   
