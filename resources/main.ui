@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Dita Access</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="dita.qrc">
+    <normaloff>:/images/DITA LOGO.png</normaloff>:/images/DITA LOGO.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
     <string notr="true">QWidget{
@@ -218,7 +222,7 @@ QLineEdit {
             <string notr="true"/>
            </property>
            <property name="text">
-            <string>Laptop</string>
+            <string>Signin</string>
            </property>
           </widget>
          </item>
