@@ -164,10 +164,10 @@ class LaptopDao(BaseDao):
         """
         l = Laptop()
         try:
-            self._db.cursor.execute("SELECT * FROM Laptops WHERE serial=%s", (serial,))
+            self._db.cursor.execute("SELECT * FROM Laptops WHERE lower(serial)=%s", (serial.lower(),))
             details = self._db.cursor.fetchone()
-            l.make = details[0]
-            l.serial = details[1]
+            l.serial = details[0]
+            l.make = details[1]
             l.member = DAOFactory(self._db).get_dao("member").get_object(details[2])
         except self._db.error:
             print("Laptop not found")
