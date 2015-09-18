@@ -4,7 +4,7 @@ from model.config import Config
 
 class Database:
     """
-
+    Facilitates connections to the database
     """
 
     def __init__(self):
