@@ -4,12 +4,12 @@ class Config:
                  "host": "localhost",
                  "database": "dita"}
 
-    table = None
+    collection = None
 
     @classmethod
-    def get_table(cls):
-        return cls.table
+    def get_collection(cls):
+        return cls.collection
 
     @classmethod
-    def set_table(cls, table):
-        cls.table = table
+    def set_collection(cls, collection):
+        cls.table = collection
