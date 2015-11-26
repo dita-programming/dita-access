@@ -2,8 +2,8 @@
 This is the main model.
 """
 from model.database import Database
-from model.member import Member
-from model.laptop import Laptop
+from model.memberdo import MemberDO
+from model.laptopdo import LaptopDO
 from model.log import LogItem
 from model.dao import DAOFactory
 from model.validator import ValidatorFactory

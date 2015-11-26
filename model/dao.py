@@ -1,21 +1,12 @@
 from abc import ABCMeta, abstractmethod
-from model.member import Member
-from model.laptop import Laptop
-from model.log import LogItem
+
+from mongoengine.errors import OperationError
+
+from model.do import Member, Laptop, LogItem
 from model.config import Config
 
 
 class DAOFactory:
-    def __init__(self, db):
-        self.__db = db
-
-    @property
-    def connection(self):
-        return self.__db
-
-    @connection.setter
-    def connection(self, db):
-        self.__db = db
 
     def get_dao(self, val):
         dao = val
@@ -32,8 +23,6 @@ class DAOFactory:
 
 
 class BaseDao(metaclass=ABCMeta):
-    def __init__(self, db):
-        self._db = db
 
     @abstractmethod
     def add_object(self, obj):
@@ -57,8 +46,8 @@ class BaseDao(metaclass=ABCMeta):
 
 
 class MemberDao(BaseDao):
-    def __init__(self, db=None):
-        super(MemberDao, self).__init__(db)
+    def __init__(self):
+        super(MemberDao, self).__init__()
 
     def add_object(self, obj):
         """Persists a Member instance.
@@ -68,10 +57,15 @@ class MemberDao(BaseDao):
         :return:
         """
         try:
-            self._db.cursor.execute("INSERT INTO Members VALUES(%s,%s)", (obj.id, obj.name))
-            self._db.conn.commit()
-        except self._db.error:
-            print("Unable to add member")
+            member = Member.objects(id_no=obj.id_no).first()
+            if member:
+                raise OperationError("Member already exists")
+
+            obj.save()
+            return True
+        except OperationError as e:
+            print(e)
+            return False
 
     def remove_object(self, obj):
         """Removes a persisted Member instance
@@ -81,13 +75,43 @@ class MemberDao(BaseDao):
         :return:
         """
         try:
-            self._db.cursor.execute("DELETE FROM Members WHERE id_no=%s", (obj.id,))
-            self._db.conn.commit()
-        except self._db.error:
-            print("Unable to delete member")
+            member = Member.objects(id_no=obj.id_no).first()
+            if not member:
+                raise OperationError("Member does not exist")
 
-    def update_object(self, obj):
-        pass
+            if obj.image:
+                obj.image.delete()
+
+            obj.delete()
+            return True
+        except OperationError as e:
+            print(e)
+            return False
+
+    def update_object(self, id_no, obj):
+        """Updates a persisted member with new details
+
+        :param key: A key to retrieve the old member
+        :param obj: A member instance with the new details for an update
+        :return:
+        """
+        try:
+            member = Member.objects(id_no=id_no).first()
+            if not member:
+                raise OperationError("Member does not exist")
+
+            member.name = obj.name
+
+            if member.image:
+                member.image.replace(obj.image, content_type=obj.image.content_type)
+            else:
+                member.image.put(obj.image, content_type=obj.image.content_type)
+
+            member.save()
+            return True
+        except OperationError as e:
+            print(e)
+            return False
 
     def get_object(self, id_no):
         """Returns a Member instance
@@ -97,25 +121,17 @@ class MemberDao(BaseDao):
         :param id_no: A string with the member id to fetch
         :return: A member instance with the fetched details
         """
-        m = Member()
         try:
-            self._db.cursor.execute("SELECT * FROM Members WHERE id_no=%s", (id_no,))
-            details = self._db.cursor.fetchone()
-            m.id = details[0]
-            m.name = details[1]
-        except self._db.error:
+            member = Member.objects(id_no=id_no).first()
+        except:
             print("Member not found")
         finally:
-            return m
+            return member
 
     def get_objects(self):
         try:
-            members = []
-
-            self._db.cursor.execute("SELECT * FROM Members")
-            if self._db.cursor.with_rows:
-                members = [Member(row) for row in self._db.cursor.fetchall()]
-        except self._db.error:
+            members = Member.objects()
+        except:
             print("No member found")
         finally:
             return members

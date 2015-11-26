@@ -1,4 +1,4 @@
-class Laptop:
+class LaptopDO:
     def __init__(self, make=None, serial=None, member=None):
         self.__make = make
         self.__serial = serial

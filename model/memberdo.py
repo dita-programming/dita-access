@@ -1,4 +1,4 @@
-class Member:
+class MemberDO:
     def __init__(self, id_no=None, name=None):
         self.__name = name
         self.__id = id_no

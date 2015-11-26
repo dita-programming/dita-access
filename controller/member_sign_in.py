@@ -1,10 +1,11 @@
 from PyQt5 import QtWidgets, QtCore
+
 from view import Ui_sign_inDialog, StyledMessageBox
-from model import Database, Member, DAOFactory, ValidatorFactory
+from model import Database, MemberDO, DAOFactory, ValidatorFactory
 
 
 class SignInDialog(QtWidgets.QDialog):
-    validation_finished = QtCore.pyqtSignal(Member)
+    validation_finished = QtCore.pyqtSignal(MemberDO)
 
     def __init__(self, parent):
         QtWidgets.QDialog.__init__(self, parent)
