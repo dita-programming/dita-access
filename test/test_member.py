@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from mongoengine import connect
+from mongoengine.connection import get_connection
 
 from model.do import Laptop, Member
 
@@ -14,13 +15,15 @@ class TestMember(TestCase):
         super().setUpClass()
         connect('access_test')
 
+    def tearDown(self):
+        connection = get_connection()
+        connection.drop_database('access_test')
+
     def test_create(self):
         member = Member(id_no="77-7777", name="TestUser", major="ACS")
         member.save()
 
-        member = Member.objects(id_no="77-7777").first()
-        self.assertTrue(member, "List should not be empty")
-        member.delete()
+        self.assertTrue(Member.objects(id_no="77-7777").first(), "List should not be empty")
 
     def test_image(self):
         member = Member(id_no="77-7777", name="TestUser", major="ACS")
@@ -31,7 +34,6 @@ class TestMember(TestCase):
         member.save()
         member = Member.objects(id_no="77-7777").first()
         self.assertIsNotNone(member.image.read(), "Image should not be None")
-        member.delete()
 
     def test_laptop(self):
         member = Member(id_no="77-7777", name="TestUser", major="ACS")
@@ -40,8 +42,6 @@ class TestMember(TestCase):
         laptop.save()
         laptop = Laptop.objects(serial_no="YYYYY").first()
         self.assertEqual(member, laptop.owner, "Owner should be the same")
-        member.delete()
-        laptop.delete()
 
     def test_laptops(self):
         member = Member(id_no="77-7777", name="TestUser", major="ACS")
@@ -56,6 +56,3 @@ class TestMember(TestCase):
         member.update(pull__laptops=laptop)
         member.reload()
         self.assertEqual(len(member.laptops), 1, "Should be 1")
-        member.delete()
-        laptop.delete()
-        laptop2.delete()

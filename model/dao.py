@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 from mongoengine.errors import OperationError
 
-from model.do import Member, Laptop, LogItem
+from model.do import Member, Laptop, Log
 from model.config import Config
 
 
@@ -254,7 +254,7 @@ class LogItemDao(BaseDao):
             if result:
                 mbr_dao = DAOFactory(self._db).get_dao("member")
                 for row in result:
-                    log_items.append(LogItem(mbr_dao.get_object(row[1]), row[2], row[3]))
+                    log_items.append(Log(mbr_dao.get_object(row[1]), row[2], row[3]))
         except self._db.error:
             print("get_objects(): No log item found")
         finally:
@@ -262,7 +262,7 @@ class LogItemDao(BaseDao):
 
     def get_incomplete_object(self, id_no):
         try:
-            l = LogItem()
+            l = Log()
             query = "SELECT * FROM {} WHERE id_no=%s AND time_out IS NULL".format(Config.get_table())
             self._db.cursor.execute(query, (id_no,))
             result = self._db.cursor.fetchone()
@@ -289,7 +289,7 @@ class LogItemDao(BaseDao):
             if result:
                 mbr_dao = DAOFactory(self._db).get_dao("member")
                 for row in result:
-                    log_items.append(LogItem(mbr_dao.get_object(row[1]), row[2], row[3]))
+                    log_items.append(Log(mbr_dao.get_object(row[1]), row[2], row[3]))
         except self._db.error:
             print("get_incomplete_objects(): No log item found")
         finally:

@@ -1,11 +1,10 @@
 from abc import ABCMeta, abstractmethod
 
+from model.do import Log, Member, Laptop
+
 
 class ValidatorFactory:
-    def __init__(self, mbr_dao, lpt_dao, log_dao, mbr, lpt):
-        self.__mbr_dao = mbr_dao
-        self.__lpt_dao = lpt_dao
-        self.__log_dao = log_dao
+    def __init__(self, mbr, lpt):
         self.__mbr = mbr
         self.__lpt = lpt
 
@@ -14,28 +13,25 @@ class ValidatorFactory:
             return None
 
         if val.lower() == "sign in":
-            return SignInValidator(self.__mbr_dao, self.__lpt_dao, self.__log_dao, self.__mbr, self.__lpt)
+            return SignInValidator(self.__mbr, self.__lpt)
         elif val.lower() == "sign out":
-            return SignOutValidator(self.__mbr_dao, self.__log_dao, self.__mbr)
+            return SignOutValidator(self.__mbr)
         else:
             return None
 
 
 class BaseValidator(metaclass=ABCMeta):
     def __init__(self):
-        self._mbr_val = None
-        self._lpt_val = None
-        self._log_dao = None
         self._mbr = None
         self._lpt = None
         self._msg = None
         self._msg_details = None
 
     def _is_member_in(self):
-        members = [obj.member for obj in self._log_dao.get_incomplete_objects()]
+        members = Log.get_members_in()
 
         for member in members:
-            if member.get_details() == self._mbr.get_details():
+            if member == self._mbr:
                 return True
 
         return False
@@ -51,18 +47,15 @@ class BaseValidator(metaclass=ABCMeta):
 
 
 class SignInValidator(BaseValidator):
-    def __init__(self, mbr_dao, lpt_dao, log_dao, mbr, lpt):
+    def __init__(self, mbr, lpt):
         super(SignInValidator, self).__init__()
-        self._mbr_val = MemberValidator(mbr_dao, mbr)
-        self._lpt_val = LaptopValidator(lpt_dao, lpt)
-        self._log_dao = log_dao
         self._mbr = mbr
         self._lpt = lpt
         self.__no_laptop_checked = False
 
     def validate(self):
         # Check whether member exists
-        if not self._mbr_val.check_object_exists():
+        if not Member.member_exists(self._mbr):
             self._msg = "Unregistered Member"
             self._msg_details = "Member not registered!"
             return False
@@ -75,14 +68,14 @@ class SignInValidator(BaseValidator):
 
         if not self.__no_laptop_checked:
             # Check whether laptop exists
-            if not self._lpt_val.check_object_exists():
+            if not Laptop.laptop_exists(self._lpt):
                 self._msg = "Unregistered Laptop"
                 self._msg_details = "Laptop not registered!"
                 return False
             else:
                 # Check whether laptop is registered to the right member
 
-                if self._mbr.id != self._lpt.member.id:
+                if self._mbr.id_no != self._lpt.owner.id_no:
                     self._msg = "Duplicate Laptop"
                     self._msg_details = "Laptop registered to another member!"
                     return False
@@ -101,10 +94,8 @@ class SignInValidator(BaseValidator):
 
 
 class SignOutValidator(BaseValidator):
-    def __init__(self, mbr_dao, log_dao, mbr):
+    def __init__(self, mbr):
         super(SignOutValidator, self).__init__()
-        self._mbr_val = MemberValidator(mbr_dao, mbr)
-        self._log_dao = log_dao
         self._mbr = mbr
 
     def validate(self):
@@ -117,52 +108,3 @@ class SignOutValidator(BaseValidator):
         self._msg = "Goodbye"
         self._msg_details = "Goodbye {}!".format(self._mbr.name.split()[0].title())
         return True
-
-
-class BaseObjectValidator(metaclass=ABCMeta):
-    def __init(self, dao=None, obj=None):
-        self._dao = dao
-        self._obj = obj
-
-    @abstractmethod
-    def check_object_exists(self):
-        pass
-
-
-class MemberValidator(BaseObjectValidator):
-    def __init__(self, dao, obj):
-        super(MemberValidator, self).__init__()
-        self._dao = dao
-        self._obj = obj
-
-    def check_object_exists(self):
-        return self._dao.get_object(self._obj.id).has_details()
-
-
-class LaptopValidator(BaseObjectValidator):
-    def __init__(self, dao, obj):
-        super(LaptopValidator, self).__init__()
-        self._dao = dao
-        self._obj = obj
-
-    def check_object_exists(self):
-        return self._dao.get_object(self._obj.serial).has_details()
-
-
-class LogItemValidator(BaseObjectValidator):
-    def __init__(self, dao, obj):
-        super(LogItemValidator, self).__init__()
-        self._dao = dao
-        self._obj = obj
-
-    def check_object_exists(self):
-        pass
-
-    def get_members_in(self):
-        members_in = []
-        log_items = self._dao.get_objects()
-
-        if log_items:
-            members_in = [item.member for item in log_items if item.time_out is None]
-
-        return members_in
