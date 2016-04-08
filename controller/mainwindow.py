@@ -1,8 +1,10 @@
 import datetime
 from PyQt5 import QtCore, QtWidgets, QtGui
+
+from model.do import Member, Log
 from view import Ui_MainWindow, StyledMessageBox, rc_dita
 from controller import SignInDialog, Center, Startup
-from model import Database, DAOFactory, ValidatorFactory, LogItem
+from model import ValidatorFactory
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -14,13 +16,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.members_in_model = QtGui.QStandardItemModel(0, 1, self)
         self.members_in_model.setHeaderData(0, QtCore.Qt.Horizontal, "Members in")
         self.ui.treeView.setModel(self.members_in_model)
-        self._db = Database()
         self.members_in = []
         self.sign_in = SignInDialog(self)
         self.sign_in.validation_finished.connect(self.sign_in_member)
         self.msg_box = StyledMessageBox(self)
         self.validator = None
-        self.startup = Startup(self, self._db)
+        self.startup = Startup(self)
         self.startup.prev_session_loaded.connect(self.load_session)
         self.startup.start_thread()
         QtCore.QTimer.singleShot(200, self.startup.load_previous_session)
@@ -62,14 +63,12 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     def sign_in_member(self, mbr):
-        self._db.start_connection()
-        factory = DAOFactory(self._db)
-        log_dao = factory.get_dao("log")
-        log_dao.add_object(LogItem(mbr, self.get_time()))
+        log = Log(member=mbr)
+        log.save()
         self.members_in.append(mbr)
         index = self.members_in.index(mbr)
         self.members_in_model.insertRow(index)
-        self.members_in_model.setData(self.members_in_model.index(index, 0), mbr.name.split()[0].title())
+        self.members_in_model.setData(self.members_in_model.index(index, 0), self.format_disaply(mbr))
 
     def sign_out_member(self, id_no):
         if not id_no:
@@ -77,18 +76,15 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         try:
-            self._db.start_connection()
-            factory = DAOFactory(self._db)
-            member_dao = factory.get_dao("member")
-            log_dao = factory.get_dao("log")
-            member = member_dao.get_object(id_no)
-            self.validator = ValidatorFactory(member_dao, None, log_dao, member, None).get_validator("sign out")
+
+            member = Member.objects(id_no=id_no).first()
+            self.validator = ValidatorFactory(member, None).get_validator("sign out")
 
             if self.validator.validate():
-                log_item = log_dao.get_incomplete_object(member.id)
-                log_item.time_out = self.get_time()
-                log_dao.update_object(log_item)
-                mbr_in = next((mbr for mbr in self.members_in if mbr.get_details() == member.get_details()), None)
+                log = Log.objects(member=member, time_out=None).first()
+                log.time_out = self.get_time()
+                log.save()
+                mbr_in = next((mbr for mbr in self.members_in if mbr == member), None)
                 index = self.members_in.index(mbr_in)
                 self.members_in_model.removeRow(index)
                 self.members_in.remove(mbr_in)
@@ -98,16 +94,15 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
         finally:
             self.msg_box.show_message(self.validator.message[0], self.validator.message[1])
-            self._db.close_connection()
+            self.ui.idLineEdit.clear()
 
     def load_session(self, members_list):
         if members_list:
             for member in members_list:
-                name = member.name.split()[0].title()
                 self.members_in.append(member)
                 index = self.members_in.index(member)
                 self.members_in_model.insertRow(index)
-                self.members_in_model.setData(self.members_in_model.index(index, 0), name)
+                self.members_in_model.setData(self.members_in_model.index(index, 0), self.format_display(member))
 
     def clean_up(self):
         """
@@ -116,15 +111,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.members_in.clear()
         self.members_in_model.removeRows(0, self.members_in_model.rowCount())
 
-    @classmethod
-    def check_member_in(cls, id_no):
-        """
-        Returns true if member is in and false if otherwise
-        """
-        if Database.get_member_log_details(id_no):
-            return True
-        else:
-            return False
 
     @staticmethod
     def get_time():
@@ -132,3 +118,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Returns current time
         """
         return datetime.datetime.now().time().replace(microsecond=0).strftime("%H:%M")
+
+    @staticmethod
+    def format_display(mbr):
+        return '[{}] {}'.format(mbr.major, mbr.name.split()[0].title())

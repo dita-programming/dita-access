@@ -29,7 +29,6 @@ class BaseValidator(metaclass=ABCMeta):
 
     def _is_member_in(self):
         members = Log.get_members_in()
-
         for member in members:
             if member == self._mbr:
                 return True
@@ -55,20 +54,25 @@ class SignInValidator(BaseValidator):
 
     def validate(self):
         # Check whether member exists
-        if not Member.member_exists(self._mbr):
+        print("pass")
+        if self._mbr is None:
             self._msg = "Unregistered Member"
             self._msg_details = "Member not registered!"
+            print("pass1")
             return False
 
         # Check whether member has already signed in
         if self._is_member_in():
+            print("pass2")
             self._msg = "Member in"
-            self._msg = "Member has already signed in!".format(self._mbr.id)
+            self._msg = "Member has already signed in!"
             return False
 
         if not self.__no_laptop_checked:
             # Check whether laptop exists
-            if not Laptop.laptop_exists(self._lpt):
+            print("pass3")
+
+            if self._lpt is None:
                 self._msg = "Unregistered Laptop"
                 self._msg_details = "Laptop not registered!"
                 return False

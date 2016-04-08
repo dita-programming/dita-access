@@ -1,11 +1,14 @@
 import time
 import datetime
 from PyQt5 import QtCore
+from mongoengine.context_managers import switch_collection
+
 from model import Database
 from model.config import Config
+from model.do import Log
 
 
-class TableHandler(QtCore.QObject):
+class CollectionHandler(QtCore.QObject):
     '''
     classdocs
     '''
@@ -14,7 +17,7 @@ class TableHandler(QtCore.QObject):
     clean_up = QtCore.pyqtSignal()
 
     def __init__(self):
-        super(TableHandler, self).__init__()
+        super(CollectionHandler, self).__init__()
         self.__db = Database()
     
     @staticmethod
@@ -23,18 +26,16 @@ class TableHandler(QtCore.QObject):
         Return current date
         """
         return datetime.datetime.today().strftime("%d%m%y")
-    
-    def change_table(self):
+
+    def change_collection(self):
         """
         Check every hour and change table if the day has changed
         """
-        table_name = '$' + self.get_date()
-        if table_name != Config.get_table():
-            Config.set_table(table_name)
-            self.__db.start_connection()
-            self.__db.create_table(table_name)
-            self.__db.close_connection()
+        collection = '$' + self.get_date()
+
+        if collection != Config.collection:
+            Config.collection = collection
             self.clean_up.emit()
 
         time.sleep(3600)
-        self.change_table()
+        self.change_collection()

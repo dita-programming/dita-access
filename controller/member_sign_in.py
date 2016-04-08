@@ -1,11 +1,12 @@
 from PyQt5 import QtWidgets, QtCore
 
+from model.do import Member, Laptop
 from view import Ui_sign_inDialog, StyledMessageBox
-from model import Database, MemberDO, DAOFactory, ValidatorFactory
+from model import ValidatorFactory
 
 
 class SignInDialog(QtWidgets.QDialog):
-    validation_finished = QtCore.pyqtSignal(MemberDO)
+    validation_finished = QtCore.pyqtSignal(Member)
 
     def __init__(self, parent):
         QtWidgets.QDialog.__init__(self, parent)
@@ -13,7 +14,6 @@ class SignInDialog(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self.model = self.parent().members_in_model
         self.msg_box = StyledMessageBox(None)
-        self.db = Database()
 
     @QtCore.pyqtSlot()
     def on_cbx_laptop_clicked(self):
@@ -48,15 +48,9 @@ class SignInDialog(QtWidgets.QDialog):
             return
 
         try:
-            db = Database()
-            db.start_connection()
-            factory = DAOFactory(db)
-            member_dao = factory.get_dao("member")
-            laptop_dao = factory.get_dao("laptop")
-            log_dao = factory.get_dao("log")
-            member = member_dao.get_object(id_no)
-            laptop = laptop_dao.get_object(serial_no)
-            validator = ValidatorFactory(member_dao, laptop_dao, log_dao, member, laptop).get_validator("sign in")
+            member = Member.objects(id_no=id_no).first()
+            laptop = Laptop.objects(serial_no__iexact=serial_no).first()
+            validator = ValidatorFactory(member, laptop).get_validator("sign in")
             validator.no_laptop_checked = self.ui.cbx_laptop.isChecked()
             if validator.validate():
                 self.validation_finished.emit(member)
@@ -66,7 +60,6 @@ class SignInDialog(QtWidgets.QDialog):
             success = False
         finally:
             self.msg_box.show_message(validator.message[0], validator.message[1])
-            db.close_connection()
             if success:
                 return QtWidgets.QDialog.accept(self)
             else:

@@ -26,19 +26,22 @@ class CustomDocument(Document):
 class Member(CustomDocument):
     id_no = StringField(max_length=7, regex='\d{2}-\d{4}', required=True, primary_key=True)
     name = StringField(max_length=50, required=True)
-    major = StringField(max_length=4, required=True)
+    major = StringField(max_length=4, default=None)
     image = FileField(default=None)
     laptops = ListField(ReferenceField('Laptop'), default=None)
 
     @staticmethod
     def member_exists(member):
-        return Member.objects(id_no=member.id_no).first() is not None
+        return member is not None and Member.objects(id_no=member.id_no).first() is not None
 
     def __eq__(self, other):
         return self.id_no == other.id_no
 
     def __repr__(self):
         return "%s - %s" % (self.id_no, self.name)
+
+    def __str__(self):
+        return "[%s] %s - %s" % (self.major, self.id_no, self.name)
 
 
 class Laptop(CustomDocument):
@@ -48,25 +51,24 @@ class Laptop(CustomDocument):
 
     @staticmethod
     def laptop_exists(laptop):
-        return Laptop.objects(serial_no__iexact=laptop.serial_no).first() is not None
+        print(laptop)
+        return laptop is not None and Laptop.objects(serial_no__iexact=laptop.serial_no).first() is not None
 
     def __repr__(self):
         return "%s - %s" % (self.serial_no, self.make)
 
 
-class Log(Document):
+class Log(CustomDocument):
     index = SequenceField(primary_key=True)
     member = ReferenceField('Member')
+    date = DateTimeField(default=datetime.datetime.now().date())
     time_in = DateTimeField(default=datetime.datetime.now().replace(microsecond=0))
-    time_out = DateTimeField(null=True, )
-
-    # meta = {'collection': Config.collection}
+    time_out = DateTimeField(null=True)
 
     @staticmethod
     def get_members_in():
         members = []
-        logs = Log.objects(time_out=None)
-
+        logs = Log.objects(time_out=None, date=datetime.datetime.now().date())
         for log in logs:
             members.append(log.member)
 
