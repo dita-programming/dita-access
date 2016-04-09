@@ -54,23 +54,19 @@ class SignInValidator(BaseValidator):
 
     def validate(self):
         # Check whether member exists
-        print("pass")
         if self._mbr is None:
             self._msg = "Unregistered Member"
             self._msg_details = "Member not registered!"
-            print("pass1")
             return False
 
         # Check whether member has already signed in
         if self._is_member_in():
-            print("pass2")
             self._msg = "Member in"
             self._msg = "Member has already signed in!"
             return False
 
         if not self.__no_laptop_checked:
             # Check whether laptop exists
-            print("pass3")
 
             if self._lpt is None:
                 self._msg = "Unregistered Laptop"

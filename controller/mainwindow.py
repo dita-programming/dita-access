@@ -22,8 +22,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.msg_box = StyledMessageBox(self)
         self.validator = None
         self.startup = Startup(self)
-        self.startup.prev_session_loaded.connect(self.load_session)
         self.startup.start_thread()
+        self.startup.prev_session_loaded.connect(self.load_session)
         QtCore.QTimer.singleShot(200, self.startup.load_previous_session)
 
     def closeEvent(self, event):
@@ -68,7 +68,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.members_in.append(mbr)
         index = self.members_in.index(mbr)
         self.members_in_model.insertRow(index)
-        self.members_in_model.setData(self.members_in_model.index(index, 0), self.format_disaply(mbr))
+        self.members_in_model.setData(self.members_in_model.index(index, 0), MainWindow.format_display(mbr))
 
     def sign_out_member(self, id_no):
         if not id_no:
